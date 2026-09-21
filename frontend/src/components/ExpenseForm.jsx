@@ -1,12 +1,21 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { createExpense, updateExpense } from "../redux/slices/expenseSlice.js";
 
-const ExpenseForm = ({ editingExpense, onCancelEdit, onSuccess }) => {
-  const dispatch = useDispatch();
-  const { categories } = useSelector((state) => state.categories);
-
-  const initialFormState = {
+const getInitialFormState = (expense) => {
+  if (expense) {
+    return {
+      title: expense.title || "",
+      amount: expense.amount || "",
+      type: expense.type || "expense",
+      category: expense.category?._id || expense.category || "",
+      date: expense.date
+        ? new Date(expense.date).toISOString().split("T")[0]
+        : new Date().toISOString().split("T")[0],
+      description: expense.description || ""
+    };
+  }
+  return {
     title: "",
     amount: "",
     type: "expense",
@@ -14,28 +23,22 @@ const ExpenseForm = ({ editingExpense, onCancelEdit, onSuccess }) => {
     date: new Date().toISOString().split("T")[0],
     description: ""
   };
+};
 
-  const [formData, setFormData] = useState(initialFormState);
+const ExpenseForm = ({ editingExpense, onCancelEdit, onSuccess }) => {
+  const dispatch = useDispatch();
+  const { categories } = useSelector((state) => state.categories);
+
+  const [formData, setFormData] = useState(() => getInitialFormState(editingExpense));
+  const [prevEditingExpense, setPrevEditingExpense] = useState(editingExpense);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (editingExpense) {
-      setFormData({
-        title: editingExpense.title || "",
-        amount: editingExpense.amount || "",
-        type: editingExpense.type || "expense",
-        category: editingExpense.category?._id || editingExpense.category || "",
-        date: editingExpense.date
-          ? new Date(editingExpense.date).toISOString().split("T")[0]
-          : new Date().toISOString().split("T")[0],
-        description: editingExpense.description || ""
-      });
-      setErrors({});
-    } else {
-      setFormData(initialFormState);
-    }
-  }, [editingExpense]);
+  if (editingExpense !== prevEditingExpense) {
+    setPrevEditingExpense(editingExpense);
+    setFormData(getInitialFormState(editingExpense));
+    setErrors({});
+  }
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -92,7 +95,7 @@ const ExpenseForm = ({ editingExpense, onCancelEdit, onSuccess }) => {
         await dispatch(createExpense(payload)).unwrap();
       }
 
-      setFormData(initialFormState);
+      setFormData(getInitialFormState());
       if (onSuccess) onSuccess();
     } catch (err) {
       setErrors({ form: err });
@@ -101,7 +104,7 @@ const ExpenseForm = ({ editingExpense, onCancelEdit, onSuccess }) => {
     }
   };
 
-  const filteredCategories = categories.filter(
+  const filteredCategories = (categories || []).filter(
     (cat) => cat.type === formData.type
   );
 

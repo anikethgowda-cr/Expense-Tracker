@@ -13,10 +13,11 @@ const SummaryCard = ({ title, amount = 0, type = "neutral" }) => {
     return "border-l-4 border-l-gray-400";
   };
 
+  const safeAmount = typeof amount === "number" && !isNaN(amount) ? amount : (Number(amount) || 0);
   const formattedAmount = new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: "INR"
-  }).format(amount);
+  }).format(safeAmount);
 
   return (
     <div className={`bg-white border border-gray-300 rounded shadow-sm p-5 ${getBorderColor()}`}>

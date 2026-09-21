@@ -118,7 +118,7 @@ const Categories = () => {
     }
   };
 
-  const filteredCategories = categories.filter((cat) => {
+  const filteredCategories = (categories || []).filter((cat) => {
     if (typeFilter === "all") return true;
     return cat.type === typeFilter;
   });

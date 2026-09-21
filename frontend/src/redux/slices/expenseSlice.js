@@ -101,7 +101,7 @@ const expenseSlice = createSlice({
       })
       .addCase(fetchExpenses.fulfilled, (state, action) => {
         state.loading = false;
-        state.expenses = action.payload;
+        state.expenses = Array.isArray(action.payload) ? action.payload : [];
       })
       .addCase(fetchExpenses.rejected, (state, action) => {
         state.loading = false;
@@ -122,20 +122,22 @@ const expenseSlice = createSlice({
       })
 
       .addCase(createExpense.fulfilled, (state, action) => {
-        state.expenses.unshift(action.payload);
+        state.expenses = [action.payload, ...(Array.isArray(state.expenses) ? state.expenses : [])];
       })
 
       .addCase(updateExpense.fulfilled, (state, action) => {
-        const index = state.expenses.findIndex(
-          (e) => e._id === action.payload._id
-        );
-        if (index !== -1) {
-          state.expenses[index] = action.payload;
+        if (Array.isArray(state.expenses)) {
+          const index = state.expenses.findIndex(
+            (e) => e._id === action.payload._id
+          );
+          if (index !== -1) {
+            state.expenses[index] = action.payload;
+          }
         }
       })
 
       .addCase(deleteExpense.fulfilled, (state, action) => {
-        state.expenses = state.expenses.filter((e) => e._id !== action.payload);
+        state.expenses = (Array.isArray(state.expenses) ? state.expenses : []).filter((e) => e._id !== action.payload);
       });
   }
 });

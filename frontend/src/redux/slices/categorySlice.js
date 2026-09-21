@@ -85,7 +85,7 @@ const categorySlice = createSlice({
       })
       .addCase(fetchCategories.fulfilled, (state, action) => {
         state.loading = false;
-        state.categories = action.payload;
+        state.categories = Array.isArray(action.payload) ? action.payload : [];
       })
       .addCase(fetchCategories.rejected, (state, action) => {
         state.loading = false;
@@ -93,20 +93,22 @@ const categorySlice = createSlice({
       })
 
       .addCase(createCategory.fulfilled, (state, action) => {
-        state.categories.push(action.payload);
+        state.categories = [...(Array.isArray(state.categories) ? state.categories : []), action.payload];
       })
 
       .addCase(updateCategory.fulfilled, (state, action) => {
-        const index = state.categories.findIndex(
-          (c) => c._id === action.payload._id
-        );
-        if (index !== -1) {
-          state.categories[index] = action.payload;
+        if (Array.isArray(state.categories)) {
+          const index = state.categories.findIndex(
+            (c) => c._id === action.payload._id
+          );
+          if (index !== -1) {
+            state.categories[index] = action.payload;
+          }
         }
       })
 
       .addCase(deleteCategory.fulfilled, (state, action) => {
-        state.categories = state.categories.filter((c) => c._id !== action.payload);
+        state.categories = (Array.isArray(state.categories) ? state.categories : []).filter((c) => c._id !== action.payload);
       });
   }
 });

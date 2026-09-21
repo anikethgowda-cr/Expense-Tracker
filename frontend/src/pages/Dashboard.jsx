@@ -27,7 +27,7 @@ const Dashboard = () => {
     dispatch(fetchExpenses());
   };
 
-  const recentExpenses = expenses.slice(0, 5);
+  const recentExpenses = (expenses || []).slice(0, 5);
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("en-IN", {
